@@ -1,0 +1,19 @@
+{
+  "id": "1001",
+  "username": "demo_user",
+  "coins": 100,
+  "level": 1,
+  "messages": [
+    {
+      "from": "admin",
+      "text": "Hoş geldin!",
+      "date": "2025-08-11T18:00:00Z"
+    },
+    {
+      "from": "admin",
+      "text": "sgsgsg",
+      "date": "2025-08-12T16:54:11.431Z"
+    }
+  ],
+  "createdAt": "2025-08-11T18:00:00Z"
+}

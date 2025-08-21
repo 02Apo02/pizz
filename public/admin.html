@@ -1,0 +1,59 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Admin Panel</title>
+  <style>body{font-family:Arial;padding:10px;background:#f4f4f4} .card{background:#fff;padding:10px;margin:8px;border-radius:6px;}</style>
+</head>
+<body>
+  <h1>Admin Panel (demo)</h1>
+  <button id="refresh">Refresh Users</button>
+  <button id="broadcast">Broadcast Message</button>
+  <div id="users"></div>
+
+<script>
+async function api(path, opt){
+  const r = await fetch(path, opt); return r.json();
+}
+
+document.getElementById('refresh').onclick = async ()=>{
+  const users = await api('/api/admin/users');
+  const container = document.getElementById('users'); container.innerHTML='';
+  users.forEach(u=>{
+    const div = document.createElement('div'); div.className='card';
+    div.innerHTML = `<b>${u.username}</b> (id: ${u.id})<br>Coins: ${u.coins} | Level: ${u.level}
+      <br><button data-id="${u.id}" class="edit">Edit</button>
+      <button data-id="${u.id}" class="msg">Message</button>`;
+    container.appendChild(div);
+  });
+  document.querySelectorAll('.edit').forEach(b=>b.onclick=editUser);
+  document.querySelectorAll('.msg').forEach(b=>msgUser);
+};
+
+function editUser(e){
+  const id = e.target.dataset.id;
+  const name = prompt('new username for '+id);
+  if(!name) return;
+  fetch('/api/user/'+encodeURIComponent(id),{
+    method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ username: name })
+  }).then(()=>alert('saved')).then(()=>document.getElementById('refresh').click());
+}
+
+function msgUser(e){
+  const id = e.target.dataset.id;
+  const text = prompt('message to '+id);
+  if(!text) return;
+  fetch('/api/user/'+encodeURIComponent(id)+'/message',{
+    method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ from:'admin', text })
+  }).then(()=>alert('sent')).then(()=>document.getElementById('refresh').click());
+}
+
+document.getElementById('broadcast').onclick = async ()=>{
+  const text = prompt('Broadcast text');
+  if(!text) return;
+  await api('/api/admin/broadcast',{method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ text })});
+  alert('broadcast sent');
+};
+</script>
+</body>
+</html>

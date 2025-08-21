@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Player</title>
+  <style>body{font-family:Arial;background:#0b1020;color:#fff;padding:20px}</style>
+</head>
+<body>
+  <h1>Player Demo</h1>
+  <label>Player ID: <input id="uid" value="1001"></label>
+  <button id="load">Load</button>
+  <div id="info"></div>
+
+  <h3>Messages</h3>
+  <div id="msgs"></div>
+
+  <h4>Send message to admin</h4>
+  <textarea id="msgtext" rows="3" style="width:100%"></textarea><br>
+  <button id="send">Send</button>
+
+<script>
+async function api(path, options){ 
+  const res = await fetch(path, options); 
+  return res.json();
+}
+
+document.getElementById('load').onclick = async ()=>{
+  const id = document.getElementById('uid').value.trim();
+  const user = await api('/api/user/'+encodeURIComponent(id));
+  document.getElementById('info').innerText = `Username: ${user.username} | Coins: ${user.coins} | Level: ${user.level}`;
+  renderMessages(user.messages || []);
+};
+
+function renderMessages(arr){
+  const el = document.getElementById('msgs'); el.innerHTML='';
+  if(!arr.length) el.innerHTML='<i>No messages</i>';
+  arr.forEach(m=>{
+    const d = new Date(m.date).toLocaleString();
+    const p = document.createElement('div');
+    p.style.border='1px solid #333'; p.style.padding='6px'; p.style.margin='6px 0';
+    p.innerHTML = `<b>${m.from}</b> <small>${d}</small><div>${m.text}</div>`;
+    el.appendChild(p);
+  });
+}
+
+document.getElementById('send').onclick = async ()=>{
+  const id = document.getElementById('uid').value.trim();
+  const text = document.getElementById('msgtext').value.trim();
+  if(!text) return alert('write');
+  const r = await api('/api/user/'+encodeURIComponent(id)+'/message',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({from:'player', text})
+  });
+  document.getElementById('msgtext').value='';
+  alert('sent');
+  document.getElementById('load').click();
+};
+</script>
+</body>
+</html>
